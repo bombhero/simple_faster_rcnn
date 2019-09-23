@@ -1,4 +1,4 @@
-#coding:utf8
+# coding:utf8
 
 import torch
 import torchvision
@@ -7,7 +7,7 @@ import numpy as np
 
 img_tensor = torch.zeros((1, 3, 800, 800)).float()
 print(img_tensor.shape)
-#Out: torch.Size([1, 3, 800, 800])
+# Out: torch.Size([1, 3, 800, 800])
 
 img_var = torch.autograd.Variable(img_tensor)
 
@@ -18,15 +18,15 @@ print(fe)  # length is 15
 req_features = []
 k = img_var.clone()
 for i in fe:
-   print(i)
-   k = i(k)
-   print(k.data.shape)
-   if k.size()[2] < 800//16:
-       break
-   req_features.append(i)
-   out_channels = k.size()[1]
-print(len(req_features)) #30
-print(out_channels) # 512
+    print(i)
+    k = i(k)
+    print(k.data.shape)
+    if k.size()[2] < 800//16:
+        break
+    req_features.append(i)
+    out_channels = k.size()[1]
+print(len(req_features))  # 30
+print(out_channels)  # 512
 
 for f in req_features:
     print(f)
@@ -35,7 +35,7 @@ for f in req_features:
 faster_rcnn_fe_extractor = torch.nn.Sequential(*req_features)
 out_map = faster_rcnn_fe_extractor(img_var)
 print(out_map.size())
-# #Out: torch.Size([1, 512, 50, 50])
+# Out: torch.Size([1, 512, 50, 50])
 
 ratios = [0.5, 1, 2]
 anchor_scales = [8, 16, 32]
@@ -53,11 +53,11 @@ index = 0
 # ctr: 每个特征点对应原图片区域的中心点
 ctr = dict()
 for x in range(len(ctr_x)):
-   for y in range(len(ctr_y)):
-       ctr[index] = [-1, -1]
-       ctr[index][1] = ctr_x[x] - 8
-       ctr[index][0] = ctr_y[y] - 8
-       index +=1
+    for y in range(len(ctr_y)):
+        ctr[index] = [-1, -1]
+        ctr[index][1] = ctr_x[x] - 8
+        ctr[index][0] = ctr_y[y] - 8
+        index +=1
 # print ctr
 print(len(ctr))  # 将原图片分割成50*50=2500个区域的中心点
 
@@ -69,17 +69,17 @@ print(anchors.shape)
 index = 0
 # 将候选框的坐标赋值到anchors
 for c in ctr:
- ctr_y, ctr_x = ctr[c]
- for i in range(len(ratios)):
-   for j in range(len(anchor_scales)):
-     # anchor_scales 是针对特征图的，所以需要乘以下采样"sub_sample"
-     h = sub_sample * anchor_scales[j] * np.sqrt(ratios[i])
-     w = sub_sample * anchor_scales[j] * np.sqrt(1./ ratios[i])
-     anchors[index, 0] = ctr_y - h / 2.
-     anchors[index, 1] = ctr_x - w / 2.
-     anchors[index, 2] = ctr_y + h / 2.
-     anchors[index, 3] = ctr_x + w / 2.
-     index += 1
+    ctr_y, ctr_x = ctr[c]
+    for i in range(len(ratios)):
+        for j in range(len(anchor_scales)):
+            # anchor_scales 是针对特征图的，所以需要乘以下采样"sub_sample"
+            h = sub_sample * anchor_scales[j] * np.sqrt(ratios[i])
+            w = sub_sample * anchor_scales[j] * np.sqrt(1./ ratios[i])
+            anchors[index, 0] = ctr_y - h / 2.
+            anchors[index, 1] = ctr_x - w / 2.
+            anchors[index, 2] = ctr_y + h / 2.
+            anchors[index, 3] = ctr_x + w / 2.
+            index += 1
 # (22500, 4)
 print(anchors.shape)
 
