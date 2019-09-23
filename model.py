@@ -1,4 +1,4 @@
-#coding:utf8
+# coding:utf8
 
 import torch
 import torch.nn as nn
@@ -13,8 +13,6 @@ import numpy as np
 #     'VGG16': [64, 64, 'M', 128, 128, 'M', 256, 256, 256, 'M', 512, 512, 512, 'M', 512, 512, 512, 'M'],
 #     'VGG19': [64, 64, 'M', 128, 128, 'M', 256, 256, 256, 256, 'M', 512, 512, 512, 512, 'M', 512, 512, 512, 512, 'M'],
 # }
-
-featur_cfg = ''
 
 
 class VGG(nn.Module):
@@ -172,11 +170,11 @@ class VGG(nn.Module):
 
 if __name__ == '__main__':
     vgg = VGG()
-    print vgg
+    print(vgg)
     data = torch.randn((1, 3, 800, 800))
-    print data.shape
+    print(data.shape)
     data = torch.autograd.Variable(data)
     out = vgg.forward(data)
-    print out.data.shape
+    print(out.data.shape)
 
 

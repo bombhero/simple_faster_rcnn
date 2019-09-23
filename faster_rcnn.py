@@ -18,9 +18,9 @@ print(fe)  # length is 15
 req_features = []
 k = img_var.clone()
 for i in fe:
-   print i
+   print(i)
    k = i(k)
-   print k.data.shape
+   print(k.data.shape)
    if k.size()[2] < 800//16:
        break
    req_features.append(i)
@@ -29,7 +29,7 @@ print(len(req_features)) #30
 print(out_channels) # 512
 
 for f in req_features:
-    print f
+    print(f)
 
 
 faster_rcnn_fe_extractor = torch.nn.Sequential(*req_features)
@@ -46,7 +46,7 @@ fe_size = (800//16)
 # ctr_x， ctr_y: 每个特征点对应原图片区域的右下方坐标
 ctr_x = np.arange(16, (fe_size+1) * 16, 16)
 ctr_y = np.arange(16, (fe_size+1) * 16, 16)
-print len(ctr_x)  # 共50*50个特征点，将原图片分割成50*50=2500个区域
+print(len(ctr_x))  # 共50*50个特征点，将原图片分割成50*50=2500个区域
 
 
 index = 0
@@ -59,13 +59,13 @@ for x in range(len(ctr_x)):
        ctr[index][0] = ctr_y[y] - 8
        index +=1
 # print ctr
-print len(ctr)  # 将原图片分割成50*50=2500个区域的中心点
+print(len(ctr))  # 将原图片分割成50*50=2500个区域的中心点
 
 
 # 初始化：每个区域有9个anchors候选框，每个候选框的坐标(y1, x1, y2, x2)
 anchors = np.zeros(((fe_size * fe_size * 9), 4))
 # (22500, 4)
-print anchors.shape
+print(anchors.shape)
 index = 0
 # 将候选框的坐标赋值到anchors
 for c in ctr:
@@ -109,7 +109,7 @@ valid_anchor_index = np.where(
        (anchors[:, 2] <= 800) &
        (anchors[:, 3] <= 800)
    )[0]  # 该函数返回数组中满足条件的index
-print valid_anchor_index.shape  # (8940,)，表明有8940个框满足条件
+print(valid_anchor_index.shape)  # (8940,)，表明有8940个框满足条件
 
 
 # 获取有效anchor（即边框都在图片内的anchor）的坐标
@@ -150,7 +150,7 @@ print(max_ious.shape)  # (8940,),每个anchor框内都会有一个最大值
 
 # 疑问： ious == gt_max_ious， 有区分目标
 gt_argmax_ious = np.where(ious == gt_max_ious)[0]  # 根据上面获取的目标最大IOU值，获取等于该值的index
-print gt_argmax_ious.shape  # (18,) 共计18个
+print(gt_argmax_ious.shape)  # (18,) 共计18个
 # for index in gt_argmax_ious:
 #     draw.rectangle([(valid_anchor_boxes[index, 1], valid_anchor_boxes[index, 0]),
 #                     (valid_anchor_boxes[index, 3], valid_anchor_boxes[index, 2])], outline=(255, 0, 0))
@@ -161,7 +161,7 @@ pos_iou_threshold = 0.7
 neg_iou_threshold = 0.3
 label = np.empty((len(valid_anchor_index), ), dtype=np.int32)
 label.fill(-1)
-print label.shape  # (8940,)
+print(label.shape)  # (8940,)
 label[max_ious < neg_iou_threshold] = 0  # anchor框内最大IOU值小于neg_iou_threshold，设为0
 label[gt_argmax_ious] = 1  # anchor框有全局最大IOU值，设为1
 label[max_ious >= pos_iou_threshold] = 1  # anchor框内最大IOU值大于等于pos_iou_threshold，设为1
@@ -184,15 +184,15 @@ neg_index = np.where(label == 0)[0]
 if len(neg_index) > n_neg:
    disable_index = np.random.choice(neg_index, size=(len(neg_index) - n_neg), replace = False)
    label[disable_index] = -1
-print np.sum(label == 1)  # 18个正例
-print np.sum(label == 0)  # 256-18=238个负例
+print(np.sum(label == 1))  # 18个正例
+print(np.sum(label == 0))  # 256-18=238个负例
 
 
 # 现在让我们用具有最大iou的ground truth对象为每个anchor box分配位置。
 # 注意，我们将为所有有效的anchor box分配anchor locs，而不考虑其标签，稍后在计算损失时，我们可以使用简单的过滤器删除它们。
 max_iou_bbox = bbox[argmax_ious]  # 有效anchor框对应的目标框坐标  (8940, 4)
 print(max_iou_bbox)
-print max_iou_bbox.shape  # (8940, 4)，共有8940个有效anchor框，每个anchor有坐标值（y1, x1, y2, x2）
+print(max_iou_bbox.shape)  # (8940, 4)，共有8940个有效anchor框，每个anchor有坐标值（y1, x1, y2, x2）
 
 # 有效anchor的中心点和宽高：ctr_x, ctr_y, width, height
 height = valid_anchor_boxes[:, 2] - valid_anchor_boxes[:, 0]
@@ -340,7 +340,7 @@ areas = (x2 - x1 + 1) * (y2 - y1 + 1)
 
 score = score[order]
 order = score.argsort()[::-1]
-print order  # [11999  3996  4005 ...  7995  7994     0]
+print(order)  # [11999  3996  4005 ...  7995  7994     0]
 keep = []
 while order.size > 0:
     i = order[0]
@@ -362,7 +362,7 @@ while order.size > 0:
 
 keep = keep[:n_train_post_nms]  # while training/testing , use accordingly
 roi = roi[keep]  # the final region proposals（region proposals表示预测目标框）
-print roi.shape  # (1758, 4)
+print(roi.shape)  # (1758, 4)
 
 
 # Proposal targets
@@ -485,7 +485,7 @@ for i in range(num_rois):
    # print adaptive_max_pool(im)[0].data.shape
    output.append(adaptive_max_pool(im)[0].data)
 output = torch.stack(output)
-print output.shape
+print(output.shape)
 output = torch.cat(output, 0)
 print(output.size())  # torch.Size([128, 512, 7, 7])
 
@@ -538,12 +538,12 @@ print(mask_loc_preds.shape, mask_loc_targets.shape)  # ((18L, 4L), (18L, 4L))
 
 # regression损失应用如下
 x = np.abs(mask_loc_targets.numpy() - mask_loc_preds.data.numpy())
-print x.shape  # (18, 4)
+print(x.shape)  # (18, 4)
 # print (x < 1)
 rpn_loc_loss = ((x < 1) * 0.5 * x**2) + ((x >= 1) * (x-0.5))
 # print rpn_loc_loss.shape  # (18, 4)
 rpn_loc_loss = rpn_loc_loss.sum()  # 1.1628926242031001
-print rpn_loc_loss
+print(rpn_loc_loss)
 # print rpn_loc_loss.shape
 # rpn_loc_loss = np.squeeze(rpn_loc_loss)
 # print rpn_loc_loss
@@ -551,14 +551,14 @@ print rpn_loc_loss
 N_reg = (gt_rpn_score > 0).float().sum()
 N_reg = np.squeeze(N_reg.data.numpy())
 
-print "N_reg: {}, {}".format(N_reg, N_reg.shape)
+print("N_reg: {}, {}".format(N_reg, N_reg.shape))
 rpn_loc_loss = rpn_loc_loss / N_reg
 rpn_loc_loss = np.float32(rpn_loc_loss)
 # rpn_loc_loss = torch.autograd.Variable(torch.from_numpy(rpn_loc_loss))
 rpn_lambda = 10.
 rpn_cls_loss = np.squeeze(rpn_cls_loss.data.numpy())
-print "rpn_cls_loss: {}".format(rpn_cls_loss)  # 0.693146109581
-print 'rpn_loc_loss: {}'.format(rpn_loc_loss)  # 0.0646051466465
+print("rpn_cls_loss: {}".format(rpn_cls_loss))  # 0.693146109581
+print('rpn_loc_loss: {}'.format(rpn_loc_loss))  # 0.0646051466465
 rpn_loss = rpn_cls_loss + (rpn_lambda * rpn_loc_loss)
 print("rpn_loss: {}".format(rpn_loss))  # 1.33919757605
 
@@ -605,7 +605,7 @@ print(mask_loc_preds.shape, mask_loc_targets.shape)  # ((19L, 4L), (19L, 4L))
 
 
 x = np.abs(mask_loc_targets.numpy() - mask_loc_preds.data.numpy())
-print x.shape  # (19, 4)
+print(x.shape)  # (19, 4)
 
 roi_loc_loss = ((x < 1) * 0.5 * x**2) + ((x >= 1) * (x-0.5))
 print(roi_loc_loss.sum())  # 1.4645805211187053
@@ -615,7 +615,7 @@ N_reg = (gt_roi_label > 0).float().sum()
 N_reg = np.squeeze(N_reg.data.numpy())
 roi_loc_loss = roi_loc_loss.sum() / N_reg
 roi_loc_loss = np.float32(roi_loc_loss)
-print roi_loc_loss  # 0.077294916
+print(roi_loc_loss)  # 0.077294916
 # roi_loc_loss = torch.autograd.Variable(torch.from_numpy(roi_loc_loss))
 
 
@@ -628,7 +628,7 @@ print(roi_loss)  # 3.810348778963089
 
 total_loss = rpn_loss + roi_loss
 
-print total_loss  # 5.149546355009079
+print(total_loss)  # 5.149546355009079
 
 
 

@@ -52,13 +52,13 @@ anchor_locs = utils.get_coefficient(valid_anchor_boxes, max_iou_bbox)
 anchor_conf = np.empty((len(anchors),), dtype=label.dtype)
 anchor_conf.fill(-1)
 anchor_conf[valid_anchor_index] = label
-print anchor_conf.shape  # 所有anchor对应的label（feature_size*feature_size*9）=》 (22500,)
+print(anchor_conf.shape)  # 所有anchor对应的label（feature_size*feature_size*9）=》 (22500,)
 
 # anchor_locations： 所有anchor框转为目标实体框的系数，无效anchor系数全部为0，有效anchor有有效系数
 anchor_locations = np.empty((len(anchors),) + anchors.shape[1:], dtype=anchor_locs.dtype)
 anchor_locations.fill(0)
 anchor_locations[valid_anchor_index, :] = anchor_locs
-print anchor_locations.shape  # 所有anchor对应的平移缩放系数（feature_size*feature_size*9，4）=》(22500, 4)
+print(anchor_locations.shape)  # 所有anchor对应的平移缩放系数（feature_size*feature_size*9，4）=》(22500, 4)
 
 # 这里通过候选anchor与目标实体框计算得到anchor框的置信度（anchor_conf）和平移缩放系数（anchor_locations）
 # ----------------------
@@ -68,7 +68,7 @@ print anchor_locations.shape  # 所有anchor对应的平移缩放系数（featur
 vgg = VGG()
 # out_map 特征图， # pred_anchor_locs 预测anchor框到目标框转化的系数， pred_anchor_conf 预测anchor框的分数
 out_map, pred_anchor_locs, pred_anchor_conf = vgg.forward(img_var)
-print out_map.data.shape  # (batch_size, num, feature_size, feature_size) => (1, 512, 50, 50)
+print(out_map.data.shape)  # (batch_size, num, feature_size, feature_size) => (1, 512, 50, 50)
 
 # 1. pred_anchor_locs 预测每个anchor框到目标框转化的系数（平移缩放），与 anchor_locations对应
 pred_anchor_locs = pred_anchor_locs.permute(0, 2, 3, 1).contiguous().view(1, -1, 4)
@@ -119,12 +119,13 @@ roi = utils.nms(roi, score, order, nms_thresh=0.7, n_train_post_nms=2000)
 
 # 根据预测框ROI与目标框BBox的IOU，得到每个预测框所要预测的目标框（预测框与哪个目标框的IOU大，就代表预测哪个目标）；
 # 并根据IOU对ROI做进一步过滤，并划分正负样例。
-sample_roi, keep_index, gt_assignment, roi_labels = utils.get_propose_target(roi, bbox, labels,
-                                                                                n_sample=128,
-                                                                                pos_ratio=0.25,
-                                                                                pos_iou_thresh=0.5,
-                                                                                neg_iou_thresh_hi=0.5,
-                                                                                neg_iou_thresh_lo=0.0)
+sample_roi, keep_index, gt_assignment, roi_labels = \
+    utils.get_propose_target(roi, bbox, labels,
+                             n_sample=128,
+                             pos_ratio=0.25,
+                             pos_iou_thresh=0.5,
+                             neg_iou_thresh_hi=0.5,
+                             neg_iou_thresh_lo=0.0)
 # print(sample_roi.shape)  # (128, 4)
 # 预测框对应的目标框 bbox_for_sampled_roi
 bbox_for_sampled_roi = bbox[gt_assignment[keep_index]]  # 目标框
@@ -160,7 +161,7 @@ num_rois = rois.size(0)
 for i in range(num_rois):
    roi = rois[i]
    im_idx = roi[0]  # 图片的索引号
-   # 取出索引号是im_idx的图片特征图=》(1, 512, 50, 50)，因为本实例就一张图片，所以操作完后shape并不变
+   # 取出索引号是im_idx的图片特征图 ->(1, 512, 50, 50)，因为本实例就一张图片，所以操作完后shape并不变
    out_map = out_map.narrow(0, im_idx, 1)
    # 这一步是根据预测框的的x1,y1, x2,y2坐标，从特征图out_map中把目标实体抠出来
    im = out_map[..., roi[2]:(roi[4]+1), roi[1]:(roi[3]+1)]
@@ -212,6 +213,6 @@ print(roi_loss)  # 3.810348778963089
 
 # 整体损失函数
 total_loss = rpn_loss + roi_loss
-print total_loss  # 5.149546355009079
+print(total_loss)  # 5.149546355009079
 
 

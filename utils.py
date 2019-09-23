@@ -167,6 +167,7 @@ def get_predict_bbox(anchors, pred_anchor_locs, objectness_score, n_train_pre_nm
 
 # torch.masked_select()
 
+
 def nms(roi, score, order, nms_thresh=0.7, n_train_post_nms=2000):
     # nms（非极大抑制）计算： (去除和极大值anchor框IOU大于0.7的框——即去除相交的框，保留score大，且基本无相交的框)
     roi = roi[order, :]  # (12000, 4)
