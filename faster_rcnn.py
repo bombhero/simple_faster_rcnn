@@ -57,7 +57,7 @@ for x in range(len(ctr_x)):
         ctr[index] = [-1, -1]
         ctr[index][1] = ctr_x[x] - 8
         ctr[index][0] = ctr_y[y] - 8
-        index +=1
+        index += 1
 # print ctr
 print(len(ctr))  # 将原图片分割成50*50=2500个区域的中心点
 
@@ -90,15 +90,15 @@ img.show()
 draw = ImageDraw.Draw(img)
 
 # for index in range(15000, 15009):
-for index in range(len(anchors)):
-    draw.rectangle([(anchors[index, 1], anchors[index, 0]), (anchors[index, 3], anchors[index, 2])],
-                   outline=(255, 0, 0))
+# for index in range(len(anchors)):
+#     draw.rectangle([(anchors[index, 1], anchors[index, 0]), (anchors[index, 3], anchors[index, 2])],
+#                    outline=(255, 0, 0))
 
 # 假设 图片中的两个目标框"ground-truth"
 bbox = np.asarray([[20, 30, 400, 500], [300, 400, 500, 600]], dtype=np.float32)  # [y1, x1, y2, x2] format
 draw.rectangle([(30, 20), (500, 400)], outline=(100, 255, 0))
 draw.rectangle([(400, 300), (600, 500)], outline=(100, 255, 0))
-img.show()
+# img.show()
 
 # 假设 图片中两个目标框分别对应的标签
 labels = np.asarray([6, 8], dtype=np.int8)  # 0 represents background
@@ -151,10 +151,10 @@ print(max_ious.shape)  # (8940,),每个anchor框内都会有一个最大值
 # 疑问： ious == gt_max_ious， 有区分目标
 gt_argmax_ious = np.where(ious == gt_max_ious)[0]  # 根据上面获取的目标最大IOU值，获取等于该值的index
 print(gt_argmax_ious.shape)  # (18,) 共计18个
-# for index in gt_argmax_ious:
-#     draw.rectangle([(valid_anchor_boxes[index, 1], valid_anchor_boxes[index, 0]),
-#                     (valid_anchor_boxes[index, 3], valid_anchor_boxes[index, 2])], outline=(255, 0, 0))
-# img.show()
+for index in gt_argmax_ious:
+    draw.rectangle([(valid_anchor_boxes[index, 1], valid_anchor_boxes[index, 0]),
+                    (valid_anchor_boxes[index, 3], valid_anchor_boxes[index, 2])], outline=(255, 0, 0))
+img.show()
 
 
 pos_iou_threshold = 0.7
