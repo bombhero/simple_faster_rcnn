@@ -74,7 +74,7 @@ for c in ctr:
         for j in range(len(anchor_scales)):
             # anchor_scales 是针对特征图的，所以需要乘以下采样"sub_sample"
             h = sub_sample * anchor_scales[j] * np.sqrt(ratios[i])
-            w = sub_sample * anchor_scales[j] * np.sqrt(1./ ratios[i])
+            w = sub_sample * anchor_scales[j] * np.sqrt(1. / ratios[i])
             anchors[index, 0] = ctr_y - h / 2.
             anchors[index, 1] = ctr_x - w / 2.
             anchors[index, 2] = ctr_y + h / 2.
@@ -86,18 +86,19 @@ print(anchors.shape)
 img_npy = img_tensor.numpy()
 img_npy = np.transpose(img_npy[0], (1, 2, 0)).astype(np.float32)
 img = Image.fromarray(np.uint8(img_npy))
-# # img.show()
+img.show()
 draw = ImageDraw.Draw(img)
 
 # for index in range(15000, 15009):
-# # for index in range(len(anchors)):
-#     draw.rectangle([(anchors[index, 1], anchors[index, 0]), (anchors[index, 3], anchors[index, 2])], outline=(255, 0, 0))
-# img.show()
+for index in range(len(anchors)):
+    draw.rectangle([(anchors[index, 1], anchors[index, 0]), (anchors[index, 3], anchors[index, 2])],
+                   outline=(255, 0, 0))
 
 # 假设 图片中的两个目标框"ground-truth"
-bbox = np.asarray([[20, 30, 400, 500], [300, 400, 500, 600]], dtype=np.float32) # [y1, x1, y2, x2] format
+bbox = np.asarray([[20, 30, 400, 500], [300, 400, 500, 600]], dtype=np.float32)  # [y1, x1, y2, x2] format
 draw.rectangle([(30, 20), (500, 400)], outline=(100, 255, 0))
 draw.rectangle([(400, 300), (600, 500)], outline=(100, 255, 0))
+img.show()
 
 # 假设 图片中两个目标框分别对应的标签
 labels = np.asarray([6, 8], dtype=np.int8)  # 0 represents background
@@ -122,22 +123,21 @@ ious = np.empty((len(valid_anchor_boxes), 2), dtype=np.float32)
 ious.fill(0)
 print(bbox)
 for num1, i in enumerate(valid_anchor_boxes):
-   ya1, xa1, ya2, xa2 = i
-   anchor_area = (ya2 - ya1) * (xa2 - xa1)  # anchor框面积
-   for num2, j in enumerate(bbox):
-       yb1, xb1, yb2, xb2 = j
-       box_area = (yb2 - yb1) * (xb2 - xb1)  # 目标框面积
-       inter_x1 = max([xb1, xa1])
-       inter_y1 = max([yb1, ya1])
-       inter_x2 = min([xb2, xa2])
-       inter_y2 = min([yb2, ya2])
-       if (inter_x1 < inter_x2) and (inter_y1 < inter_y2):
-           iter_area = (inter_y2 - inter_y1) * (inter_x2 - inter_x1)  # anchor框和目标框的相交面积
-           iou = iter_area / (anchor_area + box_area - iter_area)  # IOU计算
-       else:
-           iou = 0.
-
-       ious[num1, num2] = iou
+    ya1, xa1, ya2, xa2 = i
+    anchor_area = (ya2 - ya1) * (xa2 - xa1)  # anchor框面积
+    for num2, j in enumerate(bbox):
+        yb1, xb1, yb2, xb2 = j
+        box_area = (yb2 - yb1) * (xb2 - xb1)  # 目标框面积
+        inter_x1 = max([xb1, xa1])
+        inter_y1 = max([yb1, ya1])
+        inter_x2 = min([xb2, xa2])
+        inter_y2 = min([yb2, ya2])
+        if (inter_x1 < inter_x2) and (inter_y1 < inter_y2):
+            iter_area = (inter_y2 - inter_y1) * (inter_x2 - inter_x1)  # anchor框和目标框的相交面积
+            iou = iter_area / (anchor_area + box_area - iter_area)  # IOU计算
+        else:
+            iou = 0.0
+        ious[num1, num2] = iou
 print(ious.shape)  # (8940, 2)  表示每个anchor框与所有目标框的IOU，这里所有的目标框共2个。
 gt_argmax_ious = ious.argmax(axis=0)  # 找出每个目标框最大IOU的anchor框index，共2个
 print(gt_argmax_ious)  # 共2个，与图片内目标框数量一致
@@ -236,7 +236,8 @@ in_channels = 512 # depends on the output feature map. in vgg 16 it is equal to 
 n_anchor = 9 # Number of anchors at each location
 conv1 = nn.Conv2d(in_channels, mid_channels, 3, 1, 1)
 reg_layer = nn.Conv2d(mid_channels, n_anchor * 4, 1, 1, 0)
-cls_layer = nn.Conv2d(mid_channels, n_anchor * 2, 1, 1, 0) ## I will be going to use softmax here. you can equally use sigmoid if u replace 2 with 1.
+cls_layer = nn.Conv2d(mid_channels, n_anchor * 2, 1, 1, 0)
+# I will be going to use softmax here. you can equally use sigmoid if u replace 2 with 1.
 
 # conv sliding layer
 conv1.weight.data.normal_(0, 0.01)
@@ -629,13 +630,3 @@ print(roi_loss)  # 3.810348778963089
 total_loss = rpn_loss + roi_loss
 
 print(total_loss)  # 5.149546355009079
-
-
-
-
-
-
-
-
-
-
