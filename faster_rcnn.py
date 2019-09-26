@@ -1,6 +1,7 @@
 # coding:utf8
 
 import torch
+import torch.nn as nn
 import torchvision
 from PIL import Image, ImageDraw
 import numpy as np
@@ -47,7 +48,6 @@ fe_size = (800//16)
 ctr_x = np.arange(16, (fe_size+1) * 16, 16)
 ctr_y = np.arange(16, (fe_size+1) * 16, 16)
 print(len(ctr_x))  # 共50*50个特征点，将原图片分割成50*50=2500个区域
-
 
 index = 0
 # ctr: 每个特征点对应原图片区域的中心点
@@ -166,8 +166,6 @@ label[max_ious < neg_iou_threshold] = 0  # anchor框内最大IOU值小于neg_iou
 label[gt_argmax_ious] = 1  # anchor框有全局最大IOU值，设为1
 label[max_ious >= pos_iou_threshold] = 1  # anchor框内最大IOU值大于等于pos_iou_threshold，设为1
 
-
-
 pos_ratio = 0.5
 n_sample = 256
 n_pos = pos_ratio * n_sample  # 正例样本数
@@ -175,15 +173,15 @@ n_pos = pos_ratio * n_sample  # 正例样本数
 # 随机获取n_pos个正例，
 pos_index = np.where(label == 1)[0]
 if len(pos_index) > n_pos:
-   disable_index = np.random.choice(pos_index, size=(len(pos_index) - n_pos), replace=False)
-   label[disable_index] = -1
+    disable_index = np.random.choice(pos_index, size=(len(pos_index) - n_pos), replace=False)
+    label[disable_index] = -1
 
 n_neg = n_sample - np.sum(label == 1)
 neg_index = np.where(label == 0)[0]
 
 if len(neg_index) > n_neg:
-   disable_index = np.random.choice(neg_index, size=(len(neg_index) - n_neg), replace = False)
-   label[disable_index] = -1
+    disable_index = np.random.choice(neg_index, size=(len(neg_index) - n_neg), replace = False)
+    label[disable_index] = -1
 print(np.sum(label == 1))  # 18个正例
 print(np.sum(label == 0))  # 256-18=238个负例
 
@@ -230,10 +228,9 @@ anchor_locations[valid_anchor_index, :] = anchor_locs
 
 
 # Region Proposal Network (RPN)
-import torch.nn as nn
 mid_channels = 512
-in_channels = 512 # depends on the output feature map. in vgg 16 it is equal to 512
-n_anchor = 9 # Number of anchors at each location
+in_channels = 512  # depends on the output feature map. in vgg 16 it is equal to 512
+n_anchor = 9  # Number of anchors at each location
 conv1 = nn.Conv2d(in_channels, mid_channels, 3, 1, 1)
 reg_layer = nn.Conv2d(mid_channels, n_anchor * 4, 1, 1, 0)
 cls_layer = nn.Conv2d(mid_channels, n_anchor * 2, 1, 1, 0)
@@ -259,15 +256,15 @@ print(pred_cls_scores.shape, pred_anchor_locs.shape)  # ((1L, 18L, 50L, 50L), (1
 
 pred_anchor_locs = pred_anchor_locs.permute(0, 2, 3, 1).contiguous().view(1, -1, 4)
 print(pred_anchor_locs.shape)
-#Out: torch.Size([1, 22500, 4])
+# Out: torch.Size([1, 22500, 4])
 
 pred_cls_scores = pred_cls_scores.permute(0, 2, 3, 1).contiguous()
 print(pred_cls_scores.shape)
-#Out torch.Size([1, 50, 50, 18])
+# Out torch.Size([1, 50, 50, 18])
 
 objectness_score = pred_cls_scores.view(1, 50, 50, 9, 2)[:, :, :, :, 1].contiguous().view(1, -1)
 print(objectness_score.shape)
-#Out torch.Size([1, 22500])
+# Out torch.Size([1, 22500])
 
 pred_cls_scores = pred_cls_scores.view(1, -1, 2)
 print(pred_cls_scores.shape)
